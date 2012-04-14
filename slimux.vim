@@ -2,9 +2,14 @@
 let s:retry_send = ""
 
 function! g:_SlimuxPickPaneFromBuf()
-    let l:line = getline(".")
+    " Get current line under the cursor
+    let line = getline(".")
+
+    " Hide (and destroy) the scratch buffer
     hide
-    let b:target_pane = matchlist(l:line, '\([^ ]\+\)\: ')[1]
+
+    " Parse target pane
+    let b:target_pane = matchlist(line, '\([^ ]\+\)\: ')[1]
 
     if len(s:retry_send) != 0
         call g:SlimuxSend(s:retry_send)
@@ -15,11 +20,12 @@ endfunction
 
 function! g:SlimuxSelectPane()
 
-    " Create new buffer in horizontal split
+    " Create new buffer in a horizontal split
     belowright new
 
-    " Put tmux panes in the buffer. Must you cat here because tmux might fail
+    " Put tmux panes in the buffer. Must use cat here because tmux might fail
     " here due to some libevent bug in linux.
+    " Try 'tmux list-panes -a > panes.txt' to see if it is fixed
     %!tmux list-panes -a | cat
 
     " bufhidden=wipe deletes the buffer when it is hidden
@@ -30,11 +36,12 @@ function! g:SlimuxSelectPane()
     nnoremap <buffer> <silent> q :hide<CR>
     nnoremap <buffer> <silent> <ESC> :hide<CR>
 
+    " Use enter key to pick tmux pane
     nnoremap <buffer> <Enter> :call g:_SlimuxPickPaneFromBuf()<CR>
 
     " Show pane index hints if Vim is in tmux
     if len($TMUX) != 0
-        call system("tmux display-panes")
+        call system("tmux display-panes &")
     endif
 
 endfunction
@@ -100,6 +107,12 @@ function! s:GetVisual() range
 endfunction
 
 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Public interface
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+" TODO: How we can use single command for both cases?
 command! -range=% -bar -nargs=* SlimuxSendSelection call g:SlimuxSend(s:GetVisual())
 command! -range=% -bar -nargs=* SlimuxSendLine call g:SlimuxSend(getline(".") . "\n")
-command! -range=% -bar -nargs=* SlimuxConfigure call: g:SlimuxSelectPane()
+
+command! -range=% -bar -nargs=* SlimuxConfigure call g:SlimuxSelectPane()
