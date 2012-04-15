@@ -15,7 +15,7 @@ used for the first time. The configuration happens interactively. You will see
 list of available tmux panes and you can choose one by hitting enter on top of
 one.
 
-Also REPL commands can have custom pre, post and escape hooks. These allow
+Also REPL commands can have custom pre, post and escape hooks. These allows
 interaction with some more complex REPLs such as the CoffeeScript REPL.
 
 This plugin borrows ideas and some code from [vim-slime][].
