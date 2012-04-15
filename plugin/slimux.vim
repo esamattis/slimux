@@ -140,18 +140,14 @@ function! SlimuxSendCode(text)
   call s:Send(b:code_packet)
 endfunction
 
-command! SlimuxSendLine call SlimuxSendCode(getline(".") . "\n")
-command! -range=% -bar -nargs=* SlimuxSendSelection call SlimuxSendCode(s:GetVisual())
-command! SlimuxConfigureCode call SlimuxConfigureCode()
-
-
-map <Leader>d :SlimuxSendLine<CR>
-vmap <Leader>d :SlimuxSendSelection<CR>
+command! SlimuxREPLSendLine call SlimuxSendCode(getline(".") . "\n")
+command! -range=% -bar -nargs=* SlimuxREPLSendSelection call SlimuxSendCode(s:GetVisual())
+command! SlimuxREPLConfigure call SlimuxConfigureCode()
 
 
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Command interface
+" Shell interface
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 " Command interface has only one global configuration
@@ -167,7 +163,7 @@ function SlimuxSendCommand(cmd)
 
 endfunction
 
-command! SlimuxPreviousCommand call SlimuxSendCommand(s:previous_cmd)
-command! SlimuxPromptCommand call SlimuxSendCommand(input("CMD>", s:previous_cmd))
-command! SlimuxConfigureCommand call s:SelectPane(s:cmd_packet)
+command! SlimuxShellPromt call SlimuxSendCommand(input("CMD>", s:previous_cmd))
+command! SlimuxShellLast call SlimuxSendCommand(s:previous_cmd)
+command! SlimuxShellConfigure call s:SelectPane(s:cmd_packet)
 
