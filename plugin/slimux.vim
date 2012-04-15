@@ -68,11 +68,12 @@ function! s:Send(tmux_packet)
 
     if a:tmux_packet["type"] == "code"
       call s:ExecFileTypeFn("SlimuxPre_", [target])
-      let escaped_text = s:ExecFileTypeFn("SlimuxEscape_", [text])
-      let escaped_text = s:EscapeText(escaped_text)
+      let text = s:ExecFileTypeFn("SlimuxEscape_", [text])
     endif
 
-    call system("tmux set-buffer " . escaped_text)
+    let text = s:EscapeText(text)
+
+    call system("tmux set-buffer " . text)
     call system("tmux paste-buffer -t " . target)
 
     if a:tmux_packet["type"] == "code"
@@ -146,3 +147,27 @@ command! -range=% -bar -nargs=* SlimuxConfigureCode call SlimuxConfigureCode()
 
 map <Leader>d :SlimuxSendLine<CR>
 vmap <Leader>d :SlimuxSendSelection<CR>
+
+
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Command interface
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+" Command interface has only one global configuration
+
+
+let s:cmd_packet = { "target_pane": "", "type": "cmd" }
+let s:previous_cmd = ""
+
+function SlimuxSendCommand(cmd)
+
+  let s:previous_cmd = a:cmd
+  let s:cmd_packet["text"] = a:cmd . ""
+  call s:Send(s:cmd_packet)
+
+endfunction
+
+command SlimuxPreviousCommand call SlimuxSendCommand(s:previous_cmd)
+command SlimuxPromptCommand call SlimuxSendCommand(input("CMD>", s:previous_cmd))
+
