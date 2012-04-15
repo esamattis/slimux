@@ -140,9 +140,9 @@ function! SlimuxSendCode(text)
   call s:Send(b:code_packet)
 endfunction
 
-command! -range=% -bar -nargs=* SlimuxSendLine call SlimuxSendCode(getline(".") . "\n")
+command! SlimuxSendLine call SlimuxSendCode(getline(".") . "\n")
 command! -range=% -bar -nargs=* SlimuxSendSelection call SlimuxSendCode(s:GetVisual())
-command! -range=% -bar -nargs=* SlimuxConfigureCode call SlimuxConfigureCode()
+command! SlimuxConfigureCode call SlimuxConfigureCode()
 
 
 map <Leader>d :SlimuxSendLine<CR>
@@ -156,7 +156,6 @@ vmap <Leader>d :SlimuxSendSelection<CR>
 
 " Command interface has only one global configuration
 
-
 let s:cmd_packet = { "target_pane": "", "type": "cmd" }
 let s:previous_cmd = ""
 
@@ -168,6 +167,7 @@ function SlimuxSendCommand(cmd)
 
 endfunction
 
-command SlimuxPreviousCommand call SlimuxSendCommand(s:previous_cmd)
-command SlimuxPromptCommand call SlimuxSendCommand(input("CMD>", s:previous_cmd))
+command! SlimuxPreviousCommand call SlimuxSendCommand(s:previous_cmd)
+command! SlimuxPromptCommand call SlimuxSendCommand(input("CMD>", s:previous_cmd))
+command! SlimuxConfigureCommand call s:SelectPane(s:cmd_packet)
 
