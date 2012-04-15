@@ -5,9 +5,9 @@
 
 
 
-let s:retry_send = ""
+let s:retry_send = {}
 
-function! g:_SlimuxPickPaneFromBuf()
+function! g:_SlimuxPickPaneFromBuf(tmux_packet)
 
     " Get current line under the cursor
     let line = getline(".")
@@ -16,16 +16,19 @@ function! g:_SlimuxPickPaneFromBuf()
     hide
 
     " Parse target pane
-    let b:target_pane = matchlist(line, '\([^ ]\+\)\: ')[1]
+    let a:tmux_packet["target_pane"] = matchlist(line, '\([^ ]\+\)\: ')[1]
 
-    if len(s:retry_send) != 0
-        call g:SlimuxSend(s:retry_send)
-        let s:retry_send = ""
+    if !empty(s:retry_send)
+        call s:Send(s:retry_send)
+        let s:retry_send = {}
     endif
 
 endfunction
 
-function! g:SlimuxSelectPane()
+function! s:SelectPane(tmux_packet)
+
+    " Save config dict to global so that it can be accessed later
+    let g:SlimuxActiveConfigure = a:tmux_packet
 
     " Create new buffer in a horizontal split
     belowright new
@@ -44,7 +47,7 @@ function! g:SlimuxSelectPane()
     nnoremap <buffer> <silent> <ESC> :hide<CR>
 
     " Use enter key to pick tmux pane
-    nnoremap <buffer> <Enter> :call g:_SlimuxPickPaneFromBuf()<CR>
+    nnoremap <buffer> <Enter> :call g:_SlimuxPickPaneFromBuf(g:SlimuxActiveConfigure)<CR>
 
     " Use h key to display pane index hints
     nnoremap <buffer> <silent> d :call system("tmux display-panes")<CR>
@@ -52,24 +55,29 @@ function! g:SlimuxSelectPane()
 endfunction
 
 
-function! g:SlimuxSend(text)
-
+function! s:Send(tmux_packet)
 
     " Pane not selected! Save text and open selection dialog
-    if !exists('b:target_pane')
-        let s:retry_send = a:text
-        return g:SlimuxSelectPane()
+    if len(a:tmux_packet["target_pane"]) == 0
+        let s:retry_send = a:tmux_packet
+        return s:SelectPane(a:tmux_packet)
     endif
 
-    call s:ExecFileTypeFn("SlimuxPre_", [b:target_pane])
+    let target = a:tmux_packet["target_pane"]
+    let text = a:tmux_packet["text"]
 
-    let escaped_text = s:ExecFileTypeFn("SlimuxEscape_", [a:text])
-    let escaped_text = s:EscapeText(escaped_text)
+    if a:tmux_packet["type"] == "code"
+      call s:ExecFileTypeFn("SlimuxPre_", [target])
+      let escaped_text = s:ExecFileTypeFn("SlimuxEscape_", [text])
+      let escaped_text = s:EscapeText(escaped_text)
+    endif
 
     call system("tmux set-buffer " . escaped_text)
-    call system("tmux paste-buffer -t " . b:target_pane)
+    call system("tmux paste-buffer -t " . target)
 
-    call s:ExecFileTypeFn("SlimuxPost_", [b:target_pane])
+    if a:tmux_packet["type"] == "code"
+      call s:ExecFileTypeFn("SlimuxPost_", [target])
+    endif
 
 endfunction
 
@@ -111,14 +119,29 @@ endfunction
 
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Public interface
+" Code interface
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-" TODO: How we can use single command for both cases?
-command! -range=% -bar -nargs=* SlimuxSendSelection call g:SlimuxSend(s:GetVisual())
-command! -range=% -bar -nargs=* SlimuxSendLine call g:SlimuxSend(getline(".") . "\n")
+" Code interface uses per buffer configuration
 
-command! -range=% -bar -nargs=* SlimuxConfigure call g:SlimuxSelectPane()
+function! SlimuxConfigureCode()
+  if !exists("b:code_packet")
+    let b:code_packet = { "target_pane": "", "type": "code" }
+  endif
+  call s:SelectPane(b:code_packet)
+endfunction
+
+function! SlimuxSendCode(text)
+  if !exists("b:code_packet")
+    let b:code_packet = { "target_pane": "", "type": "code" }
+  endif
+  let b:code_packet["text"] = a:text
+  call s:Send(b:code_packet)
+endfunction
+
+command! -range=% -bar -nargs=* SlimuxSendLine call SlimuxSendCode(getline(".") . "\n")
+command! -range=% -bar -nargs=* SlimuxSendSelection call SlimuxSendCode(s:GetVisual())
+command! -range=% -bar -nargs=* SlimuxConfigureCode call SlimuxConfigureCode()
 
 
 map <Leader>d :SlimuxSendLine<CR>
