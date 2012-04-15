@@ -1,7 +1,14 @@
+" Tmux integration for Vim
+" Maintainer Esa-Matti Suuronen <esa-matti@suuronen.org>
+" License: MIT. See LICENSE.txt
+
+
+
 
 let s:retry_send = ""
 
 function! g:_SlimuxPickPaneFromBuf()
+
     " Get current line under the cursor
     let line = getline(".")
 
@@ -39,15 +46,14 @@ function! g:SlimuxSelectPane()
     " Use enter key to pick tmux pane
     nnoremap <buffer> <Enter> :call g:_SlimuxPickPaneFromBuf()<CR>
 
-    " Show pane index hints if Vim is in tmux
-    if len($TMUX) != 0
-        call system("tmux display-panes &")
-    endif
+    " Use h key to display pane index hints
+    nnoremap <buffer> <silent> d :call system("tmux display-panes")<CR>
 
 endfunction
 
 
 function! g:SlimuxSend(text)
+
 
     " Pane not selected! Save text and open selection dialog
     if !exists('b:target_pane')
@@ -55,13 +61,15 @@ function! g:SlimuxSend(text)
         return g:SlimuxSelectPane()
     endif
 
-    call s:ExecFileTypeFn("_PreSlimux_", [b:target_pane])
+    call s:ExecFileTypeFn("SlimuxPre_", [b:target_pane])
 
-    let escaped_text = s:EscapeText(a:text)
+    let escaped_text = s:ExecFileTypeFn("SlimuxEscape_", [a:text])
+    let escaped_text = s:EscapeText(escaped_text)
+
     call system("tmux set-buffer " . escaped_text)
     call system("tmux paste-buffer -t " . b:target_pane)
 
-    call s:ExecFileTypeFn("_PostSlimux_", [b:target_pane])
+    call s:ExecFileTypeFn("SlimuxPost_", [b:target_pane])
 
 endfunction
 
@@ -71,25 +79,20 @@ endfunction
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 function! s:EscapeText(text)
-  let transformed_text = a:text
-
-  if exists("&filetype")
-    let custom_escape = "_EscapeText_" . &filetype
-    if exists("*" . custom_escape)
-        let transformed_text = call(custom_escape, [a:text])
-    end
-  end
-
-  return substitute(shellescape(transformed_text), "\\\\\\n", "\n", "g")
+  return substitute(shellescape(a:text), "\\\\\\n", "\n", "g")
 endfunction
 
 function! s:ExecFileTypeFn(fn_name, args)
+  let result = a:args[0]
+
   if exists("&filetype")
     let fullname = a:fn_name . &filetype
     if exists("*" . fullname)
-      call call(fullname, a:args)
+      let result = call(fullname, a:args)
     end
   end
+
+  return result
 endfunction
 
 
@@ -116,3 +119,7 @@ command! -range=% -bar -nargs=* SlimuxSendSelection call g:SlimuxSend(s:GetVisua
 command! -range=% -bar -nargs=* SlimuxSendLine call g:SlimuxSend(getline(".") . "\n")
 
 command! -range=% -bar -nargs=* SlimuxConfigure call g:SlimuxSelectPane()
+
+
+map <Leader>d :SlimuxSendLine<CR>
+vmap <Leader>d :SlimuxSendSelection<CR>
