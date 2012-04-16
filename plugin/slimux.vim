@@ -47,7 +47,7 @@ function! s:SelectPane(tmux_packet)
     call setline(1, "Select tmux pane with Enter key")
     call setline(2, "")
 
-    " Add previous selection as the first
+    " Add last used pane as the first
     let last = a:tmux_packet["target_pane"]
     if len(last) != 0
       call setline(3, last . ": (previous)")
@@ -56,11 +56,13 @@ function! s:SelectPane(tmux_packet)
     " List all tmux panes at the end
     normal G
     read !tmux list-panes -a | cat
+
+    " Move cursor to first item
     call setpos(".", [0, 3, 0, 0])
 
-    " Hilight what we can select
-    highlight MyGroup ctermbg=green guibg=green
-    match MyGroup '^\([^ ]\+\)\:'
+    " Hilight items we can select
+    highlight TmuxPanes ctermbg=green guibg=green
+    match TmuxPanes '^\([^ ]\+\)\:'
 
     " bufhidden=wipe deletes the buffer when it is hidden
     setlocal bufhidden=wipe buftype=nofile
