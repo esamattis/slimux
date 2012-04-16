@@ -65,6 +65,7 @@ function! s:SelectPane(tmux_packet)
     " bufhidden=wipe deletes the buffer when it is hidden
     setlocal bufhidden=wipe buftype=nofile
     setlocal nobuflisted nomodifiable noswapfile nowrap
+    setlocal cursorline nocursorcolumn
 
     " Hide buffer on q and <ESC>
     nnoremap <buffer> <silent> q :hide<CR>
