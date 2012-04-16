@@ -58,6 +58,10 @@ function! s:SelectPane(tmux_packet)
     read !tmux list-panes -a | cat
     call setpos(".", [0, 3, 0, 0])
 
+    " Hilight what we can select
+    highlight MyGroup ctermbg=green guibg=green
+    match MyGroup '^\([^ ]\+\)\:'
+
     " bufhidden=wipe deletes the buffer when it is hidden
     setlocal bufhidden=wipe buftype=nofile
     setlocal nobuflisted nomodifiable noswapfile nowrap
