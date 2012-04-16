@@ -9,6 +9,12 @@ let s:retry_send = {}
 
 function! g:_SlimuxPickPaneFromBuf(tmux_packet)
 
+    let pos = getpos(".")[1]
+    if pos < 3
+      echo "select a pane"
+      return
+    end
+
     " Get current line under the cursor
     let line = getline(".")
 
