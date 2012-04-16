@@ -36,7 +36,18 @@ function! s:SelectPane(tmux_packet)
     " Put tmux panes in the buffer. Must use cat here because tmux might fail
     " here due to some libevent bug in linux.
     " Try 'tmux list-panes -a > panes.txt' to see if it is fixed
-    %!tmux list-panes -a | cat
+
+    call setline(1, "Select tmux pane with Enter key")
+    call setline(2, "")
+
+    let last = a:tmux_packet["target_pane"]
+    if len(last) != 0
+      call setline(3, last . ": (previous)")
+    endif
+
+    normal G
+    read !tmux list-panes -a | cat
+    call setpos(".", [0, 3, 0, 0])
 
     " bufhidden=wipe deletes the buffer when it is hidden
     setlocal bufhidden=wipe buftype=nofile
