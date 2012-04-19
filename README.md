@@ -26,6 +26,7 @@ This plugin borrows ideas and some code from [vim-slime][].
 Use [pahtogen][] and put files to
 `$HOME/.vim/bundle/slimux/`
 
+Slimux requires fairly recent tmux version. Be sure you have 1.5.x or later.
 
 ## REPL Commands
 
