@@ -21,6 +21,15 @@ interaction with some more complex REPLs such as the CoffeeScript REPL.
 This plugin borrows ideas and some code from [vim-slime][].
 
 
+Blog post
+
+http://esa-matti.suuronen.org/blog/2012/04/19/slimux-tmux-plugin-for-vim/
+
+Ascii.io screencast
+
+http://ascii.io/a/409
+
+
 ## Installation
 
 Use [pahtogen][] and put files to
