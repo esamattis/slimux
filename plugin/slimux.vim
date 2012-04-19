@@ -1,6 +1,6 @@
 " Tmux integration for Vim
 " Maintainer Esa-Matti Suuronen <esa-matti@suuronen.org>
-" License: MIT. See LICENSE.txt
+" License: MIT. See LICENSE
 
 
 
