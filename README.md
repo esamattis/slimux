@@ -79,7 +79,7 @@ can put to your `.vimrc`
 Or if you like something more Emacs Slime style try something like this:
 
     map <C-c><C-c> :SlimuxREPLSendLine<CR>
-    map <C-c><C-c> :SlimuxREPLSendSelection<CR>
+    vmap <C-c><C-c> :SlimuxREPLSendSelection<CR>
 
 You may also add shortcuts to other commands too.
 
