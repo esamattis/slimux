@@ -71,8 +71,8 @@ Prompt global pane configuration for the shell commands.
 
 ## Keyboard Shortcuts
 
-Slimux does not force shortcuts on your Vim, but here's something you
-can put to your `.vimrc`
+Slimux does not force any shortcuts on your Vim, but here's something you can
+put to your `.vimrc`
 
     map <Leader>s :SlimuxREPLSendLine<CR>
     vmap <Leader>s :SlimuxREPLSendSelection<CR>
