@@ -83,9 +83,42 @@ Or if you like something more Emacs Slime style try something like this:
 
 You may also add shortcuts to other commands too.
 
+
+## Add support for new languages
+
+Usually new there is no need to do anything. For example Ruby and Node.js REPLs
+works just fine out of box, but for some languages you have to do some preprocessing
+before the code can be sent. There are three hooks you can specify for
+each language.
+
+Custom escaping function
+
+    function SlimuxEscape_<filetype>(text)
+        return a:text
+    endfunction
+
+Pre send hook
+
+    function SlimuxPre_<filetype>()
+    endfunction
+
+Post send hook
+
+    function SlimuxPost_<filetype>()
+    endfunction
+
+Just add these to ftplugin directory contained within this plugin (and sent a pull request on Github!).
+You can use [Python][] and [CoffeeScript][] hooks as examples.
+
+
+
+
+
 [tmux]: http://tmux.sourceforge.net/
 [pahtogen]: https://github.com/tpope/vim-pathogen
 [vim-slime]: https://github.com/jpalardy/vim-slime
 
+[Python]: https://github.com/epeli/slimux/blob/master/ftplugin/python.vim
+[CoffeeScript]: https://github.com/epeli/slimux/blob/master/ftplugin/coffee.vim
 
 
