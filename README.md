@@ -99,12 +99,12 @@ Custom escaping function
 
 Pre send hook
 
-    function SlimuxPre_<filetype>()
+    function SlimuxPre_<filetype>(target_pane)
     endfunction
 
 Post send hook
 
-    function SlimuxPost_<filetype>()
+    function SlimuxPost_<filetype>(target_pane)
     endfunction
 
 Just add these to ftplugin directory contained within this plugin (and sent a pull request on Github!).
