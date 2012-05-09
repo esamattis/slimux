@@ -1,6 +1,6 @@
 # Slimux
 
-Slimux is an [tmux][] integration plugin for Vim. It makes it easy to interact
+This is a SLIME inspired tmux integration plugin for Vim. It makes it easy to interact
 with different tmux panes directly from Vim. It has two styles for interacting
 with panes. REPL and Shell styles.
 
