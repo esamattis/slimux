@@ -6,7 +6,7 @@ with panes. REPL and Shell styles.
 
 REPL commands are designed to work with various Read Eval Print Loops such as
 `python`, `irb` (Ruby), `node` (Javascript), `coffee` (CoffeeScript) etc.
-This is loosely modelled after [Slime for Emacs][SLIME]. Shell commands are designed 
+This is loosely modelled after [SLIME for Emacs][SLIME]. Shell commands are designed 
 to work with normal shells such as `bash`. These are useful for running tests for
 example.
 
