@@ -10,15 +10,15 @@ function! SlimuxEscape_python(text)
   "" Process line by line and insert needed linebreaks
   let l:non_processed_lines = split(no_empty_lines,"")
   let l:processed_lines = [l:non_processed_lines[0]]
+  " Check initial indent level
+  let l:first_word = matchstr(l:processed_lines[0],'^[a-zA-Z\"]\+')
+  if !(l:first_word == "")
+      let l:at_indent0 = 1
+  else
+      let l:at_indent0 = 0
+  endif
   " Only actually anything to do if more than one line
   if len(l:non_processed_lines) > 1
-      " Check initial indent level
-      let l:first_word = matchstr(l:processed_lines[0],'^[a-zA-Z\"]\+')
-      if !(l:first_word == "")
-          let l:at_indent0 = 1
-      else
-          let l:at_indent0 = 0
-      endif
       " Go through remaining lines
       for cur_line in l:non_processed_lines[1:]
           let l:first_word = matchstr(cur_line,'^[a-zA-Z\"]\+')
@@ -34,7 +34,8 @@ function! SlimuxEscape_python(text)
                   else
                       " Back at indent level 0. We need newline
                       let l:at_indent0 = 1
-                      let l:processed_lines = l:processed_lines + ["".cur_line]
+                      "let l:processed_lines = l:processed_lines + ["".cur_line]
+                      let l:processed_lines = l:processed_lines + ["\n".cur_line]
                   endif
               endif
           else
