@@ -3,9 +3,17 @@ let w:slimux_python_allowed_indent0 = ["elif", "else", "except", "finally"]
 
 
 function! SlimuxEscape_python(text)
+  "" Check if last line is empty in multiline selections
+  let l:last_line_empty = match(a:text,'\n\W*\n$') 
+
   "" Remove all empty lines and use soft linebreaks
   let no_empty_lines = substitute(a:text, '\n\s*\ze\n', "", "g")
   let no_empty_lines = substitute(no_empty_lines, "\n", "", "g")
+
+  "" See if any non-empty lines sent at all
+  if no_empty_lines == ""
+      return ""
+  endif
 
   "" Process line by line and insert needed linebreaks
   let l:non_processed_lines = split(no_empty_lines,"")
@@ -34,8 +42,7 @@ function! SlimuxEscape_python(text)
                   else
                       " Back at indent level 0. We need newline
                       let l:at_indent0 = 1
-                      "let l:processed_lines = l:processed_lines + ["".cur_line]
-                      let l:processed_lines = l:processed_lines + ["\n".cur_line]
+                      let l:processed_lines = l:processed_lines + ["".cur_line]
                   endif
               endif
           else
@@ -47,8 +54,8 @@ function! SlimuxEscape_python(text)
   endif
 
   "" Return the processed lines
-  if !l:at_indent0
-      " We ended at indentation. Finish with extra linebreak
+  if !l:at_indent0 && l:last_line_empty >= 0
+      " We ended at indentation and last line was empty
       return join(l:processed_lines,"").""
   else
       return join(l:processed_lines,"").""
