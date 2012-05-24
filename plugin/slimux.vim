@@ -52,9 +52,6 @@ function! s:SelectPane(tmux_packet)
     " Create new buffer in a horizontal split
     belowright new
 
-    " Put tmux panes in the buffer. Must use cat here because tmux might fail
-    " here due to some libevent bug in linux.
-    " Try 'tmux list-panes -a > panes.txt' to see if it is fixed
 
     " Set header for the menu buffer
     call setline(1, "# Enter: Select pane and send code to pane")
@@ -68,6 +65,10 @@ function! s:SelectPane(tmux_packet)
 
     " List all tmux panes at the end
     normal G
+
+    " Put tmux panes in the buffer. Must use cat here because tmux might fail
+    " here due to some libevent bug in linux.
+    " Try 'tmux list-panes -a > panes.txt' to see if it is fixed
     read !tmux list-panes -a | cat
 
     " Move cursor to first item
