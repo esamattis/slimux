@@ -10,17 +10,18 @@ let s:last_selected_pane = ""
 
 function! g:_SlimuxPickPaneFromBuf(tmux_packet, test)
 
-    let pos = getpos(".")[1]
-    if pos < 4
-      echo "select a pane"
-      return
-    end
-
     " Get current line under the cursor
     let line = getline(".")
 
     " Parse target pane from current line
-    let target_pane = matchlist(line, '\([^ ]\+\)\: ')[1]
+    let pane_match = matchlist(line, '\(^[^ ]\+\)\: ')
+
+    if len(pane_match) == 0
+      echo "Please select a pane with enter or exit with 'q'"
+      return
+    endif
+
+    let target_pane = pane_match[1]
 
     " Test only. Do not send the real packet or configure anything. Instead
     " just send line break to see on which pane the cursor is on.
