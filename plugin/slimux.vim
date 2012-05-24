@@ -53,11 +53,9 @@ function! s:SelectPane(tmux_packet)
     " Create new buffer in a horizontal split
     belowright new
 
-
     " Set header for the menu buffer
-    call setline(1, "# Enter: Select pane and send code to pane")
-    call setline(2, "# Space: Send line break to pane")
-    call setline(3, "")
+    call setline(1, "# Enter: Select pane - Space: Test - Esc/q: Cancel")
+    call setline(2, "")
 
     " Add last used pane as the first
     if len(s:last_selected_pane) != 0
@@ -73,7 +71,7 @@ function! s:SelectPane(tmux_packet)
     read !tmux list-panes -a | cat
 
     " Move cursor to first item
-    call setpos(".", [0, 4, 0, 0])
+    call setpos(".", [0, 3, 0, 0])
 
     " bufhidden=wipe deletes the buffer when it is hidden
     setlocal bufhidden=wipe buftype=nofile
