@@ -6,6 +6,7 @@
 
 
 let s:retry_send = {}
+let s:last_pane = ""
 
 function! g:_SlimuxPickPaneFromBuf(tmux_packet)
 
@@ -23,6 +24,7 @@ function! g:_SlimuxPickPaneFromBuf(tmux_packet)
 
     " Parse target pane
     let a:tmux_packet["target_pane"] = matchlist(line, '\([^ ]\+\)\: ')[1]
+    let s:last_pane = a:tmux_packet["target_pane"]
 
     if !empty(s:retry_send)
         call s:Send(s:retry_send)
@@ -48,9 +50,8 @@ function! s:SelectPane(tmux_packet)
     call setline(2, "")
 
     " Add last used pane as the first
-    let last = a:tmux_packet["target_pane"]
-    if len(last) != 0
-      call setline(3, last . ": (previous)")
+    if len(s:last_pane) != 0
+      call setline(3, s:last_pane . ": (last one used)")
     endif
 
     " List all tmux panes at the end
