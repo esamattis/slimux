@@ -6,12 +6,12 @@
 
 
 let s:retry_send = {}
-let s:last_pane = ""
+let s:last_selected_pane = ""
 
-function! g:_SlimuxPickPaneFromBuf(tmux_packet)
+function! g:_SlimuxPickPaneFromBuf(tmux_packet, test)
 
     let pos = getpos(".")[1]
-    if pos < 3
+    if pos < 4
       echo "select a pane"
       return
     end
@@ -19,12 +19,23 @@ function! g:_SlimuxPickPaneFromBuf(tmux_packet)
     " Get current line under the cursor
     let line = getline(".")
 
+    " Parse target pane from current line
+    let target_pane = matchlist(line, '\([^ ]\+\)\: ')[1]
+
+    " Test only. Do not send the real packet or configure anything. Instead
+    " just send line break to see on which pane the cursor is on.
+    if a:test
+        return s:Send({ "target_pane": target_pane, "text": "\n", "type": "code" })
+    endif
+
     " Hide (and destroy) the scratch buffer
     hide
 
-    " Parse target pane
-    let a:tmux_packet["target_pane"] = matchlist(line, '\([^ ]\+\)\: ')[1]
-    let s:last_pane = a:tmux_packet["target_pane"]
+    " Configure current packet
+    let a:tmux_packet["target_pane"] = target_pane
+
+    " Save last selected pane
+    let s:last_selected_pane = target_pane
 
     if !empty(s:retry_send)
         call s:Send(s:retry_send)
@@ -46,12 +57,13 @@ function! s:SelectPane(tmux_packet)
     " Try 'tmux list-panes -a > panes.txt' to see if it is fixed
 
     " Set header for the menu buffer
-    call setline(1, "Select tmux pane with Enter key")
-    call setline(2, "")
+    call setline(1, "# Enter: Select pane and send code to pane")
+    call setline(2, "# Space: Send line break to pane")
+    call setline(3, "")
 
     " Add last used pane as the first
-    if len(s:last_pane) != 0
-      call setline(3, s:last_pane . ": (last one used)")
+    if len(s:last_selected_pane) != 0
+      call setline(4, s:last_selected_pane . ": (last one used)")
     endif
 
     " List all tmux panes at the end
@@ -59,11 +71,7 @@ function! s:SelectPane(tmux_packet)
     read !tmux list-panes -a | cat
 
     " Move cursor to first item
-    call setpos(".", [0, 3, 0, 0])
-
-    " Hilight items we can select
-    highlight TmuxPanes ctermbg=green guibg=green
-    match TmuxPanes '^\([^ ]\+\)\:'
+    call setpos(".", [0, 4, 0, 0])
 
     " bufhidden=wipe deletes the buffer when it is hidden
     setlocal bufhidden=wipe buftype=nofile
@@ -75,9 +83,11 @@ function! s:SelectPane(tmux_packet)
     nnoremap <buffer> <silent> <ESC> :hide<CR>
 
     " Use enter key to pick tmux pane
-    nnoremap <buffer> <Enter> :call g:_SlimuxPickPaneFromBuf(g:SlimuxActiveConfigure)<CR>
+    nnoremap <buffer> <Enter> :call g:_SlimuxPickPaneFromBuf(g:SlimuxActiveConfigure, 0)<CR>
 
-    " Use h key to display pane index hints
+    nnoremap <buffer> <Space> :call g:_SlimuxPickPaneFromBuf(g:SlimuxActiveConfigure, 1)<CR>
+
+    " Use d key to display pane index hints
     nnoremap <buffer> <silent> d :call system("tmux display-panes")<CR>
 
 endfunction
