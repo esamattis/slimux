@@ -59,7 +59,7 @@ function! s:SelectPane(tmux_packet)
 
     " Add last used pane as the first
     if len(s:last_selected_pane) != 0
-      call setline(4, s:last_selected_pane . ": (last one used)")
+      call setline(3, s:last_selected_pane . ": (last one used)")
     endif
 
     " List all tmux panes at the end
