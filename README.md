@@ -64,6 +64,19 @@ Prompt for a shell command and send it to configured tmux pane.
 
 Rerun last shell command.
 
+### SlimuxShellRun
+
+Specify a shell command to run directly, without the prompt:
+
+    :SlimuxShellRun rspec spec/foo_spec.rb
+
+Suitable for mapping and other automation.
+
+Note that you need to double any escapes intended for the shell using this command.
+E.g. to list files with actual asterisks in their name:
+
+    :SlimuxShellRun ls \\*
+
 ### SlimuxShellConfigure
 
 Prompt global pane configuration for the shell commands.
@@ -137,5 +150,3 @@ maybe one of these is:
 
 [Python]: https://github.com/epeli/slimux/blob/master/ftplugin/python.vim
 [CoffeeScript]: https://github.com/epeli/slimux/blob/master/ftplugin/coffee.vim
-
-

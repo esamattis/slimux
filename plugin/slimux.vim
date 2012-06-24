@@ -201,7 +201,8 @@ function SlimuxSendCommand(cmd)
 
 endfunction
 
-command! SlimuxShellPrompt call SlimuxSendCommand(input("CMD>", s:previous_cmd))
-command! SlimuxShellLast call SlimuxSendCommand(s:previous_cmd)
+command! -nargs=1 -complete=shellcmd SlimuxShellRun call SlimuxSendCommand("<args>")
+command! SlimuxShellPrompt    call SlimuxSendCommand(input("CMD>", s:previous_cmd))
+command! SlimuxShellLast      call SlimuxSendCommand(s:previous_cmd)
 command! SlimuxShellConfigure call s:SelectPane(s:cmd_packet)
 
