@@ -56,9 +56,9 @@ Prompt pane configuration for current buffer.
 
 ## Shell Commands
 
-### SlimuxShellPromt
+### SlimuxShellPrompt
 
-Promt for a shell command and send it to configured tmux pane.
+Prompt for a shell command and send it to configured tmux pane.
 
 ### SlimuxShellLast
 
