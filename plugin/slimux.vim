@@ -68,7 +68,7 @@ function! s:SelectPane(tmux_packet)
     " Put tmux panes in the buffer. Must use cat here because tmux might fail
     " here due to some libevent bug in linux.
     " Try 'tmux list-panes -a > panes.txt' to see if it is fixed
-    read !tmux list-panes -a | cat
+    read !tmux list-panes -F '\#{pane_id}: \#{session_name}:\#{window_index}.\#{pane_index}: \#{window_name}: \#{pane_title} [\#{pane_width}x\#{pane_height}] \#{?pane_active,(active),}' -a | cat
 
     " Move cursor to first item
     call setpos(".", [0, 3, 0, 0])
