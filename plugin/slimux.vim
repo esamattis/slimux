@@ -102,20 +102,31 @@ function! s:Send(tmux_packet)
     endif
 
     let target = a:tmux_packet["target_pane"]
-    let text = a:tmux_packet["text"]
+    let type = a:tmux_packet["type"]
 
-    if a:tmux_packet["type"] == "code"
-      call s:ExecFileTypeFn("SlimuxPre_", [target])
-      let text = s:ExecFileTypeFn("SlimuxEscape_", [text])
-    endif
+    if type == "code" || type == "cmd"
 
-    let text = s:EscapeText(text)
+      let text = a:tmux_packet["text"]
 
-    call system("tmux set-buffer " . text)
-    call system("tmux paste-buffer -t " . target)
+      if type == "code"
+        call s:ExecFileTypeFn("SlimuxPre_", [target])
+        let text = s:ExecFileTypeFn("SlimuxEscape_", [text])
+      endif
 
-    if a:tmux_packet["type"] == "code"
-      call s:ExecFileTypeFn("SlimuxPost_", [target])
+      let text = s:EscapeText(text)
+
+      call system("tmux set-buffer " . text)
+      call system("tmux paste-buffer -t " . target)
+
+      if type == "code"
+        call s:ExecFileTypeFn("SlimuxPost_", [target])
+      endif
+
+    elseif type == 'keys'
+
+      let keys = a:tmux_packet["keys"]
+      call system("tmux send-keys -t " . target . " " . keys)
+
     endif
 
 endfunction
@@ -203,6 +214,31 @@ endfunction
 
 command! -nargs=1 -complete=shellcmd SlimuxShellRun call SlimuxSendCommand("<args>")
 command! SlimuxShellPrompt    call SlimuxSendCommand(input("CMD>", s:previous_cmd))
-command! SlimuxShellLast      call SlimuxSendCommand(s:previous_cmd)
+command! SlimuxShellLast      call SlimuxSendCommand(s:previous_cmd != "" ? s:previous_cmd : input("CMD>", s:previous_cmd))
 command! SlimuxShellConfigure call s:SelectPane(s:cmd_packet)
 
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Keys interface
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+" Send raw keys using the tmux 'send-keys' syntax.
+" Works like the shell interface regarding configuration.
+" Here's an example the stops the currently running server(ctrl+c) and starts it again:
+" :SlimuxSendKeysPrompt
+" KEYS>C-C 'make run-server' Enter)
+
+let s:keys_packet = { "target_pane": "", "type": "keys" }
+let s:previous_keys = ""
+
+function! SlimuxSendKeys(keys)
+
+  let s:previous_keys = a:keys
+  let s:keys_packet["keys"] = a:keys
+  call s:Send(s:keys_packet)
+
+endfunction
+
+command! SlimuxSendKeysPrompt    call SlimuxSendKeys(input('KEYS>', s:previous_keys))
+command! SlimuxSendKeysLast      call SlimuxSendKeys(s:previous_keys != "" ? s:previous_keys : input('KEYS>'))
+command! SlimuxSendKeysConfigure call s:SelectPane(s:keys_packet)
