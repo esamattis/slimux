@@ -93,6 +93,10 @@ shell(ctrl+c) and restart it(assuming the command to start is 'make run-server')
 
     :SlimuxSendKeysPrompt
     KEYS>C-C 'make run-server' Enter
+    
+or run previous command with
+
+    KEYS>Up Enter
 
 In short, some strings such as 'C-C' or 'Enter' have special meanings,
 while others are sent as a sequence of character keys(in the above example, 'make run-server')
