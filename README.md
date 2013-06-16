@@ -77,9 +77,9 @@ E.g. to list files with actual asterisks in their name:
 
     :SlimuxShellRun ls \\*
 
-### SlimuxShellConfigure
+### SlimuxShellConfigure [pane-id]
 
-Prompt global pane configuration for the shell commands.
+Select the tmux pane to which shell commands will be sent. If executed without a parameter it prompts global pane configuration for the shell commands. If called with parameter it selects the pane without user interaction, which will aid multi-pane workflows. Parameter is the tmux pane identifier in \d:\d:\d form and completed automatically with cline completion.
 
 
 ## Sending Keys
