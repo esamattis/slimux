@@ -113,10 +113,18 @@ function! s:Send(tmux_packet)
         let text = s:ExecFileTypeFn("SlimuxEscape_", [text])
       endif
 
-      let text = s:EscapeText(text)
 
-      call system("tmux set-buffer " . text)
-      call system("tmux paste-buffer -t " . target)
+      " The limit of text bytes tmux can send one time. 500 is a safe value.
+      let s:sent_text_length_limit = 500
+
+      " If the text is too long, split the text into pieces and send them one by one
+      while text != ""
+          let local_text = strpart(text, 0, s:sent_text_length_limit)
+          let text = strpart(text, s:sent_text_length_limit)
+          let local_text = s:EscapeText(local_text)
+          call system("tmux set-buffer " . local_text)
+          call system("tmux paste-buffer -t " . target)
+      endwhile
 
       if type == "code"
         call s:ExecFileTypeFn("SlimuxPost_", [target])
