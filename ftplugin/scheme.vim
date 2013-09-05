@@ -24,7 +24,7 @@
 "       let g:slimux_scheme_keybindings=1
 "
 "   c) To change the default leader, want to change it to ';' for example.
-"       let g:slimux_scheme_leader=";'
+"       let g:slimux_scheme_leader=';'
 "=============================================================================
 
 " Settings {{{1
@@ -58,6 +58,11 @@ function! Slimux_scheme_eval_defun()
     call setpos('.', pos)
 endfunction
 
+" Evaluate the entire buffer
+function! Slimux_scheme_eval_buffer()
+    call SlimuxSendCode(join(getline(1, '$'), "\n") . "\n")
+endfunction
+
 " invoke restart by number
 function! Slimux_scheme_restart_by_number(num)
     let sent_text="(restart ". a:num .")\n"
@@ -66,11 +71,13 @@ endfunction
 
 " Change functions to commands {{{1
 command! SlimuxSchemeEvalDefun call Slimux_scheme_eval_defun()
+command! SlimuxSchemeEvalBuffer call Slimux_scheme_eval_buffer()
 command! -nargs=1 SlimuxSchemeRestartByNum call Slimux_scheme_restart_by_number(<args>)
 
 " Set keybindings {{{1
 if g:slimux_scheme_keybindings == 1
     execute 'noremap <buffer> <silent> ' . g:slimux_scheme_leader.'d :SlimuxSchemeEvalDefun<CR>'
+    execute 'noremap <buffer> <silent> ' . g:slimux_scheme_leader.'b :SlimuxSchemeEvalBuffer<CR>'
     execute 'noremap <buffer> <silent> ' . g:slimux_scheme_leader.'p :SlimuxShellPrompt<CR>'
     execute 'noremap <buffer> <silent> ' . g:slimux_scheme_leader.'k :SlimuxSendKeysPrompt<CR>'
 
