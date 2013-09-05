@@ -1,7 +1,7 @@
 "=============================================================================
 " README.
 " 1. What is this plugin?
-"   This plugin add simple REPL support for scheme. 
+"   This plugin add simple REPL support for scheme.
 "
 "   Like slime for emacs or slimv for vim except that this is much simpler and
 "   comunicate via slimux instead of swank connection.
@@ -15,7 +15,7 @@
 "   <Leader>k -- Prompt for a key and send it.
 "   <Leader>q -- quit debug. => (RESTART 1)
 "   <Leader>1..9 -- send (RESTART <1..9>) to the REPL.
-"   
+"
 " 3. Configurations.
 "   a) To disable this plugin
 "       add `let g:slimux_scheme_loaded=1` to your vimrc
@@ -52,10 +52,10 @@ endif
 
 " Evaluate a scheme 'define' statement
 function! Slimux_scheme_eval_defun()
-	let pos = getpos(".")
-	silent! exec "normal! 99[(yab"
-	call SlimuxSendCode(@" . "\n")
-	call setpos('.', pos)
+    let pos = getpos(".")
+    silent! exec "normal! 99[(yab"
+    call SlimuxSendCode(@" . "\n")
+    call setpos('.', pos)
 endfunction
 
 " invoke restart by number
@@ -73,7 +73,7 @@ if g:slimux_scheme_keybindings == 1
     execute 'noremap <buffer> <silent> ' . g:slimux_scheme_leader.'d :SlimuxSchemeEvalDefun<CR>'
     execute 'noremap <buffer> <silent> ' . g:slimux_scheme_leader.'p :SlimuxShellPrompt<CR>'
     execute 'noremap <buffer> <silent> ' . g:slimux_scheme_leader.'k :SlimuxSendKeysPrompt<CR>'
-    
+
     " bind keys for restart.
     for i in range(10)
         execute 'noremap <buffer> <silent> ' . g:slimux_scheme_leader . i . ' :SlimuxSchemeRestartByNum ' . i . '<CR>'
