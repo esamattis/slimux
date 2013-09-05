@@ -48,6 +48,20 @@ if !exists('g:slimux_scheme_keybindings')
     let g:slimux_scheme_keybindings = 0
 endif
 
+" Add scheme support for normal SlimuxSendSelection {{{1
+
+function! SlimuxEscape_scheme(text)
+    " if text does not end with newline, add one
+    if a:text !~ "\n$"
+        let str_ret = a:text . '\n'
+    else
+        let str_ret = a:text
+    endif
+
+    return str_ret
+endfunction
+
+
 " Function Definitions {{{1
 
 " Evaluate a scheme 'define' statement
