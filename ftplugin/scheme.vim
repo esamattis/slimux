@@ -20,8 +20,8 @@
 "   a) To disable this plugin
 "       add `let g:slimux_scheme_loaded=1` to your vimrc
 "
-"   b) To Disable all keybindings
-"       let g:slimux_scheme_keybindings=0
+"   b) To enable default keybindings (recommended)
+"       let g:slimux_scheme_keybindings=1
 "
 "   c) To change the default leader, want to change it to ';' for example.
 "       let g:slimux_scheme_leader=";'
@@ -45,7 +45,7 @@ endif
 
 " slimux_scheme keybinding set (0 = no keybindings)
 if !exists('g:slimux_scheme_keybindings')
-    let g:slimux_scheme_keybindings = 1
+    let g:slimux_scheme_keybindings = 0
 endif
 
 " Function Definitions {{{1
