@@ -122,7 +122,7 @@ function! s:Send(tmux_packet)
           let local_text = strpart(text, 0, s:sent_text_length_limit)
           let text = strpart(text, s:sent_text_length_limit)
           let local_text = s:EscapeText(local_text)
-          call system("tmux set-buffer " . local_text)
+          call system("tmux set-buffer -- " . local_text)
           call system("tmux paste-buffer -t " . target)
       endwhile
 
