@@ -197,8 +197,21 @@ function! SlimuxSendCode(text)
   call s:Send(b:code_packet)
 endfunction
 
+function! s:SlimeSendRange()  range abort
+    if !exists("b:code_packet")
+        let b:code_packet = { "target_pane": "", "type": "code" }
+    endif
+    let rv = getreg('"')
+    let rt = getregtype('"')
+    sil exe a:firstline . ',' . a:lastline . 'yank'
+    call SlimuxSendCode(@")
+    call setreg('"',rv, rt)
+endfunction
+
+
 command! SlimuxREPLSendLine call SlimuxSendCode(getline(".") . "\n")
 command! -range=% -bar -nargs=* SlimuxREPLSendSelection call SlimuxSendCode(s:GetVisual())
+command! -range -bar -nargs=0 SlimuxREPLSendLine <line1>,<line2>call s:SlimeSendRange()
 command! SlimuxREPLConfigure call SlimuxConfigureCode()
 
 
