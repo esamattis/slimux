@@ -175,6 +175,19 @@ function! s:GetVisual() range
     return selection
 endfunction
 
+function! s:GetBuffer()
+    let l:winview = winsaveview()
+    let reg_save = getreg('"')
+    let regtype_save = getregtype('"')
+    let cb_save = &clipboard
+    set clipboard&
+    silent normal! ggVGy
+    let selection = getreg('"')
+    call setreg('"', reg_save, regtype_save)
+    let &clipboard = cb_save
+    call winrestview(l:winview)
+    return selection
+endfunction
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Code interface
@@ -212,6 +225,7 @@ endfunction
 command! SlimuxREPLSendLine call SlimuxSendCode(getline(".") . "\n")
 command! -range=% -bar -nargs=* SlimuxREPLSendSelection call SlimuxSendCode(s:GetVisual())
 command! -range -bar -nargs=0 SlimuxREPLSendLine <line1>,<line2>call s:SlimeSendRange()
+command! -range=% -bar -nargs=* SlimuxREPLSendBuffer call SlimuxSendCode(s:GetBuffer())
 command! SlimuxREPLConfigure call SlimuxConfigureCode()
 
 
@@ -228,7 +242,8 @@ let s:previous_cmd = ""
 function! SlimuxSendCommand(cmd)
 
   let s:previous_cmd = a:cmd
-  let s:cmd_packet["text"] = a:cmd . ""
+  let s:cmd_packet["text"] = a:cmd . "
+"
   call s:Send(s:cmd_packet)
 
 endfunction
