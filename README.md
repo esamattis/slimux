@@ -127,9 +127,10 @@ Or if you like something more Emacs Slime style try something like this:
 
 You may also add shortcuts to other commands too.
 
-For Scheme Slimux has few extra bindings. Enable them with
+For Scheme/Racket Slimux has few extra bindings. Enable them with
 
     let g:slimux_scheme_keybindings=1
+    let g:slimux_racket_keybindings=1
 
 For more information refer to the [scheme plugin header](https://github.com/epeli/slimux/blob/master/ftplugin/scheme.vim).
 
