@@ -81,6 +81,9 @@ endfunction
 function! Slimux_racket_eval_defun()
     let pos = getpos(".")
     let regContent = @"
+    let s:skip_sc = 'synIDattr(synID(line("."), col("."), 0), "name") =~ "[Ss]tring\\|[Cc]omment"'
+    let [lhead, chead] = searchpairpos( '(', '', ')', 'bW', s:skip_sc)
+    call cursor(lhead, chead)
     silent! exec "normal! 99[(yab"
     if getline('.')[0] == '('
         call SlimuxSendCode(@" . "\n")
