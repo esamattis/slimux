@@ -161,7 +161,10 @@ Post send hook
 Just add these to ftplugin directory contained within this plugin (and sent a pull request on Github!).
 You can use [Python][] and [CoffeeScript][] hooks as examples.
 
+## Options
 
+- `g:slimux_select_from_current_window = 1` select panes only from current
+  window. Default to `0` to select panes from all tmux panes.
 
 
 ## Other Vim Slime plugins
