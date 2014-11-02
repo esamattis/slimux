@@ -127,9 +127,10 @@ Or if you like something more Emacs Slime style try something like this:
 
 You may also add shortcuts to other commands too.
 
-For Scheme Slimux has few extra bindings. Enable them with
+For Scheme/Racket Slimux has few extra bindings. Enable them with
 
     let g:slimux_scheme_keybindings=1
+    let g:slimux_racket_keybindings=1
 
 For more information refer to the [scheme plugin header](https://github.com/epeli/slimux/blob/master/ftplugin/scheme.vim).
 
@@ -160,7 +161,10 @@ Post send hook
 Just add these to ftplugin directory contained within this plugin (and sent a pull request on Github!).
 You can use [Python][] and [CoffeeScript][] hooks as examples.
 
+## Options
 
+- `g:slimux_select_from_current_window = 1` select panes only from current
+  window. Default to `0` to select panes from all tmux panes.
 
 
 ## Other Vim Slime plugins
