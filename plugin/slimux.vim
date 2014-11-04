@@ -248,8 +248,7 @@ let s:previous_cmd = ""
 function! SlimuxSendCommand(cmd)
 
   let s:previous_cmd = a:cmd
-  let s:cmd_packet["text"] = a:cmd . "
-"
+  let s:cmd_packet["text"] = a:cmd . "\n"
   call s:Send(s:cmd_packet)
 
 endfunction
