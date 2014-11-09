@@ -53,6 +53,9 @@ function! s:SelectPane(tmux_packet)
     " Create new buffer in a horizontal split
     belowright new
 
+    " Get some basic syntax highlighting
+    set filetype=markdown
+
     " Set header for the menu buffer
     call setline(1, "# Enter: Select pane - Space: Test - Esc/q: Cancel")
     call setline(2, "")
