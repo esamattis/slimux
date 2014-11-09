@@ -76,8 +76,9 @@ function! s:SelectPane(tmux_packet)
         read !tmux list-panes -F '\#{pane_id}: \#{session_name}:\#{window_index}.\#{pane_index}: \#{window_name}: \#{pane_title} [\#{pane_width}x\#{pane_height}] \#{?pane_active,(active),}' -a | cat
     endif
 
-    " Resize the split to the number of lines
-    execute line('$') . 'wincmd _'
+    " Resize the split to the number of lines in the buffer,
+    " limit to 10 lines maximum.
+    execute min([ 10, line('$') ]) . 'wincmd _'
 
     " Move cursor to first item
     call setpos(".", [0, 3, 0, 0])
