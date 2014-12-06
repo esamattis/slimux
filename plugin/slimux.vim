@@ -68,16 +68,25 @@ function! s:SelectPane(tmux_packet)
     " List all tmux panes at the end
     normal G
 
-    " Put tmux panes in the buffer. Must use cat here because tmux might fail
-    " here due to some libevent bug in linux.
-    " Try 'tmux list-panes -a > panes.txt' to see if it is fixed
+    " Put tmux panes in the buffer.
+    if !exists("g:slimux_pane_format")
+      let g:slimux_pane_format = '#{session_name}:#{window_index}.#{pane_index}: #{window_name}: #{pane_title} [#{pane_width}x#{pane_height}] #{?pane_active,(active),}'
+    endif
+
+    " We need the pane_id at the beginning of the line so we can
+    " identify the selected target pane
+    let l:format = '#{pane_id}: ' . g:slimux_pane_format
+    let l:command = "read !tmux list-panes -F '" . escape(l:format, '#') . "'"
+
     " if g:slimux_select_from_current_window = 1, then list panes from current
     " window only.
-    if exists("g:slimux_select_from_current_window") && g:slimux_select_from_current_window == 1
-        read !tmux list-panes -F '\#{pane_id}: \#{session_name}:\#{window_index}.\#{pane_index}: \#{window_name}: \#{pane_title} [\#{pane_width}x\#{pane_height}] \#{?pane_active,(active),}' | cat
-    else
-        read !tmux list-panes -F '\#{pane_id}: \#{session_name}:\#{window_index}.\#{pane_index}: \#{window_name}: \#{pane_title} [\#{pane_width}x\#{pane_height}] \#{?pane_active,(active),}' -a | cat
+    if !exists("g:slimux_select_from_current_window") || g:slimux_select_from_current_window != 1
+      let l:command .= ' -a'
     endif
+
+    " Must use cat here because tmux might fail here due to some libevent bug in linux.
+    " Try 'tmux list-panes -a > panes.txt' to see if it is fixed
+    execute l:command . ' | cat'
 
     " Resize the split to the number of lines in the buffer,
     " limit to 10 lines maximum.

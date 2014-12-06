@@ -164,7 +164,10 @@ You can use [Python][] and [CoffeeScript][] hooks as examples.
 ## Options
 
 - `g:slimux_select_from_current_window = 1` select panes only from current
-  window. Default to `0` to select panes from all tmux panes.
+  window. Defaults to `0` to select panes from all tmux panes.
+
+- `g:slimux_pane_format` customize the formatting of the panes, see the FORMATS section in `man tmux`.  
+  The string "`#{pane_id}: `" is always prepended to the format so Slimux can identify the selected pane.
 
 
 ## Other Vim Slime plugins
