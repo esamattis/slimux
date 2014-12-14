@@ -70,7 +70,7 @@ function! s:SelectPane(tmux_packet)
 
     " Put tmux panes in the buffer.
     if !exists("g:slimux_pane_format")
-      let g:slimux_pane_format = '#{session_name}:#{window_index}.#{pane_index}: #{window_name}: #{pane_title} [#{pane_width}x#{pane_height}] #{?pane_active,(active),}'
+      let g:slimux_pane_format = '#{session_name}:#{window_index}.#{pane_index}: #{window_name}: #{pane_title} [#{pane_width}x#{pane_height}]#{?pane_active, (active),}'
     endif
 
     " We need the pane_id at the beginning of the line so we can
