@@ -53,11 +53,11 @@ function! s:SelectPane(tmux_packet)
     " Create new buffer in a horizontal split
     belowright new
 
-    " Get some basic syntax highlighting
-    set filetype=markdown
+    " Use slimux file type
+    set filetype=slimux
 
     " Set header for the menu buffer
-    call setline(1, "# Enter: Select pane - Space: Test - Esc/q: Cancel")
+    call setline(1, "Enter: Select pane - Space: Test - Esc/q: Cancel")
     call setline(2, "")
 
     " Add last used pane as the first
