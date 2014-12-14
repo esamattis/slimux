@@ -76,7 +76,7 @@ function! s:SelectPane(tmux_packet)
     " We need the pane_id at the beginning of the line so we can
     " identify the selected target pane
     let l:format = '#{pane_id}: ' . g:slimux_pane_format
-    let l:command = "read !tmux list-panes -F '" . escape(l:format, '#') . "'"
+    let l:command = "tmux list-panes -F '" . escape(l:format, '#') . "'"
 
     " if g:slimux_select_from_current_window = 1, then list panes from current
     " window only.
@@ -84,21 +84,37 @@ function! s:SelectPane(tmux_packet)
       let l:command .= ' -a'
     endif
 
+    " Remove current pane from pane list
+    let l:current_pane_id = system('tmux display-message -p "\#{pane_id}"')
+    let l:current_pane_id = substitute(l:current_pane_id, "\n", "", "g")
+    let l:command .= " | grep -E -v " . shellescape("^" . l:current_pane_id, 1)
+
+    " Warn if no additional pane is found
+    let l:no_panes_warning = "No additional panes found"
+    if exists("g:slimux_select_from_current_window") && g:slimux_select_from_current_window == 1
+      let l:no_panes_warning .= " in current window (g:slimux_select_from_current_window is enabled)"
+    endif
+    let l:command .= " || echo '" . l:no_panes_warning . "'"
+
     " Must use cat here because tmux might fail here due to some libevent bug in linux.
     " Try 'tmux list-panes -a > panes.txt' to see if it is fixed
-    execute l:command . ' | cat'
+    let l:command .= ' | cat'
+
+    " Fill buffer with pane list
+    execute 'read !' . l:command
 
     " Resize the split to the number of lines in the buffer,
     " limit to 10 lines maximum.
     execute min([ 10, line('$') ]) . 'wincmd _'
 
     " Move cursor to first item
+    normal gg
     call setpos(".", [0, 3, 0, 0])
 
     " bufhidden=wipe deletes the buffer when it is hidden
     setlocal bufhidden=wipe buftype=nofile
     setlocal nobuflisted nomodifiable noswapfile nowrap
-    setlocal cursorline nocursorcolumn
+    setlocal cursorline nocursorcolumn nonumber
 
     " Hide buffer on q and <ESC>
     nnoremap <buffer> <silent> q :hide<CR>
