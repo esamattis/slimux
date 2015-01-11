@@ -2,7 +2,7 @@ let s:not_prefixable_keywords = [ "import", "data", "instance", "class", "{-#", 
 let s:spaces = repeat(" ", 4)
 let s:tab = "	"
 
-function ProcessLines(lines)
+function! ProcessLines(lines)
 	let l:lines = a:lines
 	" skip empty lines
 	let l:first_line = 0
@@ -31,7 +31,7 @@ function ProcessLines(lines)
 	endif
 endfunction
 
-function StripComments(lines)
+function! StripComments(lines)
 	let l:lines = a:lines
 	let l:ret = []
 	let l:i = 0
@@ -46,7 +46,7 @@ function StripComments(lines)
 	return l:ret
 endfunction
 
-function SlimuxEscape_haskell(text)
+function! SlimuxEscape_haskell(text)
 	let l:text = substitute(a:text, s:tab, s:spaces, "g")
 	let l:lines = split(l:text, "\n")
 	let l:lines = StripComments(l:lines)
