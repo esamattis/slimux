@@ -29,7 +29,7 @@ http://esa-matti.suuronen.org/blog/2012/04/19/slimux-tmux-plugin-for-vim/
 
 Ascii.io screencast
 
-http://ascii.io/a/409
+https://asciinema.org/a/409
 
 
 ## Installation
