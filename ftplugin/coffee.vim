@@ -6,7 +6,7 @@ function! SlimuxPre_coffee(target_pane)
     call system("tmux send-keys -t " . a:target_pane . " C-v")
 endfunction
 
-" Exit multi-line REPL mode with Ctrl+d
+" Exit multi-line REPL mode with another Ctrl+v
 function! SlimuxPost_coffee(target_pane)
-    call system("tmux send-keys -t " . a:target_pane . " C-d")
+    call system("tmux send-keys -t " . a:target_pane . " C-v")
 endfunction
