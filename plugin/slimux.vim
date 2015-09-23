@@ -131,7 +131,7 @@ function! s:SelectPane(tmux_packet)
 
     " Set key mapping for pane index hitns
     if !exists("g:slimux_pane_hint_map")
-      let g:slimux_pane_hint_map = 'dd'
+      let g:slimux_pane_hint_map = 'd'
     endif
     execute 'nnoremap <buffer> <silent> ' . g:slimux_pane_hint_map . ' :call system("tmux display-panes")<CR>'
 
