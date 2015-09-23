@@ -5,62 +5,88 @@
 
 
 
+let s:slimux_panelist_cmd = "tmux list-panes -a"
 let s:retry_send = {}
 let s:last_selected_pane = ""
 
-function! g:_SlimuxPickPaneFromBuf(tmux_packet, test)
-
-    " Get current line under the cursor
-    let line = getline(".")
-
-    " Parse target pane from current line
-    let pane_match = matchlist(line, '\(^[^ ]\+\)\: ')
-
-    if len(pane_match) == 0
-      echo "Please select a pane with enter or exit with 'q'"
-      return
+function! s:PickPaneIdFromLine(line)
+    let l:pane_match = matchlist(a:line, '\(^[^ ]\+\)\: ')
+    if len(l:pane_match) == 0
+        return ""
     endif
-
-    let target_pane = pane_match[1]
-
-    " Test only. Do not send the real packet or configure anything. Instead
-    " just send line break to see on which pane the cursor is on.
-    if a:test
-        return s:Send({ "target_pane": target_pane, "text": "\n", "type": "code" })
-    endif
-
-    " Hide (and destroy) the scratch buffer
-    hide
-
-    " Configure current packet
-    let a:tmux_packet["target_pane"] = target_pane
-
-    " Save last selected pane
-    let s:last_selected_pane = target_pane
-
-    let type = a:tmux_packet["type"]
-
-    if type == "global"
-        if !exists("b:code_packet")
-            let b:code_packet = { "target_pane": "", "type": "code" }
-        endif
-        let b:code_packet["target_pane"] = a:tmux_packet["target_pane"]
-        let s:cmd_packet["target_pane"] = a:tmux_packet["target_pane"]
-        let s:keys_packet["target_pane"] = a:tmux_packet["target_pane"]
-        return
-    endif
-
-    if !empty(s:retry_send)
-        call s:Send(s:retry_send)
-        let s:retry_send = {}
-    endif
-
+    return l:pane_match[1]
 endfunction
 
-function! s:SelectPane(tmux_packet)
+function! SlimuxGetPaneList(lead, ...)
+    let l:panes = system(s:slimux_panelist_cmd)
+    let l:lst = map(split(l:panes, '\n'), 's:PickPaneIdFromLine(v:val)')
 
-    " Save config dict to global so that it can be accessed later
-    let g:SlimuxActiveConfigure = a:tmux_packet
+    if !exists("g:slimux_exclude_vim_pane") || g:slimux_exclude_vim_pane != 0
+        " Remove current pane from pane list
+        let l:current_pane_id = system('tmux display-message -p "#{session_name}:#{window_index}.#{pane_index}"')
+        let l:current_pane_id = substitute(l:current_pane_id, "\n", "", "g")
+        let l:lst = filter(l:lst, 'v:val !~ "' . l:current_pane_id . '"')
+    endif
+
+    return filter(l:lst, 'v:val =~ ''\V\^''. a:lead')
+endfunction
+
+function! s:ConfSetPane(tmux_packet, target_pane)
+  " Configure current packet
+  let a:tmux_packet["target_pane"] = a:target_pane
+  " Save last selected pane
+  let s:last_selected_pane = a:target_pane
+
+  let type = a:tmux_packet["type"]
+
+  if type == "global"
+      if !exists("b:code_packet")
+          let b:code_packet = { "target_pane": "", "type": "code" }
+      endif
+      let b:code_packet["target_pane"] = a:tmux_packet["target_pane"]
+      let s:cmd_packet["target_pane"] = a:tmux_packet["target_pane"]
+      let s:keys_packet["target_pane"] = a:tmux_packet["target_pane"]
+      return
+  endif
+
+  if !empty(s:retry_send)
+      call s:Send(s:retry_send)
+      let s:retry_send = {}
+  endif
+
+  if !empty(s:retry_send)
+      call s:Send(s:retry_send)
+      let s:retry_send = {}
+  endif
+endfunction
+
+function! g:_SlimuxPickPaneFromBuf(tmux_packet, test)
+    let l:target_pane = s:PickPaneIdFromLine(getline("."))
+    if l:target_pane == ""
+       echo "Please select a pane with enter or exit with 'q'"
+       return
+     endif
+
+     " Test only. Do not send the real packet or configure anything. Instead
+     " just send line break to see on which pane the cursor is on.
+     if a:test
+        return s:Send({ "target_pane": l:target_pane, "text": "\n", "type": "code" })
+     endif
+
+     hide
+    call s:ConfSetPane(a:tmux_packet, l:target_pane)
+endfunction
+
+function! s:SelectPane(tmux_packet, ...)
+     " Save config dict to global so that it can be accessed later
+     let g:SlimuxActiveConfigure = a:tmux_packet
+
+    if exists('a:1')
+        if a:1 != ""
+            call s:ConfSetPane(g:SlimuxActiveConfigure, a:1)
+            return
+        endif
+    endif
 
     " Create new buffer in a horizontal split
     belowright new
@@ -99,10 +125,12 @@ function! s:SelectPane(tmux_packet)
       let l:command .= ' -a'
     endif
 
-    " Remove current pane from pane list
-    let l:current_pane_id = system('tmux display-message -p "\#{pane_id}"')
-    let l:current_pane_id = substitute(l:current_pane_id, "\n", "", "g")
-    let l:command .= " | grep -E -v " . shellescape("^" . l:current_pane_id, 1)
+    if !exists("g:slimux_exclude_vim_pane") || g:slimux_exclude_vim_pane != 0
+        " Remove current pane from pane list
+        let l:current_pane_id = system('tmux display-message -p "\#{pane_id}"')
+        let l:current_pane_id = substitute(l:current_pane_id, "\n", "", "g")
+        let l:command .= " | grep -E -v " . shellescape("^" . l:current_pane_id, 1)
+    endif
 
     " Warn if no additional pane is found
     let l:no_panes_warning = "No additional panes found"
@@ -372,3 +400,4 @@ command! SlimuxSendKeysConfigure call s:SelectPane(s:keys_packet)
 let s:global_conf = { "target_pane": "", "type": "global" }
 
 command! SlimuxGlobalConfigure call s:SelectPane(s:global_conf)
+command! -nargs=? -complete=customlist,SlimuxGetPaneList SlimuxShellConfigure call s:SelectPane(s:cmd_packet, <q-args>)
