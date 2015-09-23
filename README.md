@@ -72,10 +72,10 @@ Specify a shell command to run directly, without the prompt:
 
 Suitable for mapping and other automation.
 
-Note that you need to double any escapes intended for the shell using this command.
+Note that you need to escape strings intended for the shell.
 E.g. to list files with actual asterisks in their name:
 
-    :SlimuxShellRun ls \\*
+    :SlimuxShellRun ls *\**
 
 ### SlimuxShellConfigure
 
