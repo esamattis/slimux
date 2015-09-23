@@ -315,6 +315,7 @@ function! SlimuxSendKeys(keys)
 
 endfunction
 
+command! -nargs=1 SlimuxSendKeys call SlimuxSendKeys("<args>")
 command! SlimuxSendKeysPrompt    call SlimuxSendKeys(input('KEYS>', s:previous_keys))
 command! SlimuxSendKeysLast      call SlimuxSendKeys(s:previous_keys != "" ? s:previous_keys : input('KEYS>'))
 command! SlimuxSendKeysConfigure call s:SelectPane(s:keys_packet)
