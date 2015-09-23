@@ -53,8 +53,11 @@ function! s:SelectPane(tmux_packet)
     " Create new buffer in a horizontal split
     belowright new
 
-    " Get some basic syntax highlighting
-    set filetype=markdown
+    " Get syntax highlighting from specified filetype
+    if !exists("g:slimux_buffer_filetype")
+      let g:slimux_buffer_filetype = 'sh'
+    endif
+    let &filetype=g:slimux_buffer_filetype
 
     " Set header for the menu buffer
     call setline(1, "# Enter: Select pane - Space: Test - Esc/q: Cancel")
