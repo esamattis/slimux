@@ -209,8 +209,10 @@ function! s:GetVisual() range
     let reg_save = getreg('"')
     let regtype_save = getregtype('"')
     let cb_save = &clipboard
+
     set clipboard&
     silent normal! ""gvy
+
     let selection = getreg('"')
     call setreg('"', reg_save, regtype_save)
     let &clipboard = cb_save
@@ -223,11 +225,31 @@ function! s:GetBuffer()
     let regtype_save = getregtype('"')
     let cb_save = &clipboard
     set clipboard&
+
     silent normal! ggVGy
     let selection = getreg('"')
+
     call setreg('"', reg_save, regtype_save)
     let &clipboard = cb_save
     call winrestview(l:winview)
+    return selection
+endfunction
+
+function! s:GetParagraph()
+    let reg_save = getreg('"')
+    let regtype_save = getregtype('"')
+    let cb_save = &clipboard
+    set clipboard&
+    let l:l = line(".")
+    let l:c = col(".")
+
+    " Do the business:
+    silent normal ""yip
+    let selection = getreg('"')
+
+    call cursor(l:l, l:c)
+    call setreg('"', reg_save, regtype_save)
+    let &clipboard = cb_save
     return selection
 endfunction
 
@@ -261,25 +283,6 @@ function! s:SlimeSendRange()  range abort
     sil exe a:firstline . ',' . a:lastline . 'yank'
     call SlimuxSendCode(@")
     call setreg('"',rv, rt)
-endfunction
-
-" Pointers taken from the s:Preserve(command) function as shown in
-" http://vimcasts.org/episodes/tidying-whitespace/
-function! s:GetParagraph()
-    " Preparation: save last search, and cursor position.
-    let l:clipboard = getreg('"')
-    let l:l = line(".")
-    let l:c = col(".")
-
-    " Do the business:
-    silent normal ""yip
-    let l:paragraph = getreg('"')
-
-    " Cleanup: restore last cursor position and old clipboard
-    call setreg('"', l:clipboard)
-    call cursor(l:l, l:c)
-
-    return l:paragraph
 endfunction
 
 command! SlimuxREPLSendLine call SlimuxSendCode(getline(".") . "\n")
