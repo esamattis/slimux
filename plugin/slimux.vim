@@ -209,16 +209,16 @@ function! s:GetVisual() range
     let reg_save = getreg('"')
     let regtype_save = getregtype('"')
     let cb_save = &clipboard
-
     set clipboard&
-    silent normal! ""gvy
 
+    silent normal! ""gvy
     let selection = getreg('"')
+
+    " restore the selection, this only works if we don't change
+    " pane selection buffer
+    silent normal! gv
     call setreg('"', reg_save, regtype_save)
     let &clipboard = cb_save
-
-    silent normal! gv
-
     return selection
 endfunction
 
