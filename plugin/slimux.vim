@@ -38,6 +38,18 @@ function! g:_SlimuxPickPaneFromBuf(tmux_packet, test)
     " Save last selected pane
     let s:last_selected_pane = target_pane
 
+    let type = a:tmux_packet["type"]
+
+    if type == "global"
+        if !exists("b:code_packet")
+            let b:code_packet = { "target_pane": "", "type": "code" }
+        endif
+        let b:code_packet["target_pane"] = a:tmux_packet["target_pane"]
+        let s:cmd_packet["target_pane"] = a:tmux_packet["target_pane"]
+        let s:keys_packet["target_pane"] = a:tmux_packet["target_pane"]
+        return
+    endif
+
     if !empty(s:retry_send)
         call s:Send(s:retry_send)
         let s:retry_send = {}
@@ -53,11 +65,14 @@ function! s:SelectPane(tmux_packet)
     " Create new buffer in a horizontal split
     belowright new
 
-    " Get some basic syntax highlighting
-    set filetype=markdown
+    " Get syntax highlighting from specified filetype
+    if !exists("g:slimux_buffer_filetype")
+      let g:slimux_buffer_filetype = 'sh'
+    endif
+    let &filetype=g:slimux_buffer_filetype
 
     " Set header for the menu buffer
-    call setline(1, "# Enter: Select pane - Space: Test - Esc/q: Cancel")
+    call setline(1, "# Enter: Select pane - Space/x: Test - C-c/q: Cancel")
     call setline(2, "")
 
     " Add last used pane as the first
@@ -76,7 +91,7 @@ function! s:SelectPane(tmux_packet)
     " We need the pane_id at the beginning of the line so we can
     " identify the selected target pane
     let l:format = '#{pane_id}: ' . g:slimux_pane_format
-    let l:command = "read !tmux list-panes -F '" . escape(l:format, '#') . "'"
+    let l:command = "silent read !tmux list-panes -F '" . escape(l:format, '#') . "'"
 
     " if g:slimux_select_from_current_window = 1, then list panes from current
     " window only.
@@ -100,17 +115,25 @@ function! s:SelectPane(tmux_packet)
     setlocal nobuflisted nomodifiable noswapfile nowrap
     setlocal cursorline nocursorcolumn
 
-    " Hide buffer on q and <ESC>
+    " Hide buffer on q, and C-c
     nnoremap <buffer> <silent> q :hide<CR>
-    nnoremap <buffer> <silent> <ESC> :hide<CR>
+    nnoremap <buffer> <silent> <C-c> :hide<CR>
+
+    if !exists("g:slimux_enable_close_with_esc") || g:slimux_enable_close_with_esc != 0
+        nnoremap <buffer> <silent> <ESC> :hide<CR>
+    endif
 
     " Use enter key to pick tmux pane
-    nnoremap <buffer> <Enter> :call g:_SlimuxPickPaneFromBuf(g:SlimuxActiveConfigure, 0)<CR>
+    nnoremap <buffer> <silent> <Enter> :call g:_SlimuxPickPaneFromBuf(g:SlimuxActiveConfigure, 0)<CR>
 
-    nnoremap <buffer> <Space> :call g:_SlimuxPickPaneFromBuf(g:SlimuxActiveConfigure, 1)<CR>
+    nnoremap <buffer> <silent> x :call g:_SlimuxPickPaneFromBuf(g:SlimuxActiveConfigure, 1)<CR>
+    nnoremap <buffer> <silent> <Space> :call g:_SlimuxPickPaneFromBuf(g:SlimuxActiveConfigure, 1)<CR>
 
-    " Use d key to display pane index hints
-    nnoremap <buffer> <silent> d :call system("tmux display-panes")<CR>
+    " Set key mapping for pane index hitns
+    if !exists("g:slimux_pane_hint_map")
+      let g:slimux_pane_hint_map = 'd'
+    endif
+    execute 'nnoremap <buffer> <silent> ' . g:slimux_pane_hint_map . ' :call system("tmux display-panes")<CR>'
 
 endfunction
 
@@ -190,8 +213,13 @@ function! s:GetVisual() range
     let regtype_save = getregtype('"')
     let cb_save = &clipboard
     set clipboard&
+
     silent normal! ""gvy
     let selection = getreg('"')
+
+    " restore the selection, this only works if we don't change
+    " pane selection buffer
+    silent normal! gv
     call setreg('"', reg_save, regtype_save)
     let &clipboard = cb_save
     return selection
@@ -203,11 +231,31 @@ function! s:GetBuffer()
     let regtype_save = getregtype('"')
     let cb_save = &clipboard
     set clipboard&
+
     silent normal! ggVGy
     let selection = getreg('"')
+
     call setreg('"', reg_save, regtype_save)
     let &clipboard = cb_save
     call winrestview(l:winview)
+    return selection
+endfunction
+
+function! s:GetParagraph()
+    let reg_save = getreg('"')
+    let regtype_save = getregtype('"')
+    let cb_save = &clipboard
+    set clipboard&
+    let l:l = line(".")
+    let l:c = col(".")
+
+    " Do the business:
+    silent normal ""yip
+    let selection = getreg('"')
+
+    call cursor(l:l, l:c)
+    call setreg('"', reg_save, regtype_save)
+    let &clipboard = cb_save
     return selection
 endfunction
 
@@ -243,8 +291,8 @@ function! s:SlimeSendRange()  range abort
     call setreg('"',rv, rt)
 endfunction
 
-
 command! SlimuxREPLSendLine call SlimuxSendCode(getline(".") . "\n")
+command! SlimuxREPLSendParagraph call SlimuxSendCode(s:GetParagraph())
 command! -range=% -bar -nargs=* SlimuxREPLSendSelection call SlimuxSendCode(s:GetVisual())
 command! -range -bar -nargs=0 SlimuxREPLSendLine <line1>,<line2>call s:SlimeSendRange()
 command! -range=% -bar -nargs=* SlimuxREPLSendBuffer call SlimuxSendCode(s:GetBuffer())
@@ -296,6 +344,15 @@ function! SlimuxSendKeys(keys)
 
 endfunction
 
+command! -nargs=1 SlimuxSendKeys call SlimuxSendKeys("<args>")
 command! SlimuxSendKeysPrompt    call SlimuxSendKeys(input('KEYS>', s:previous_keys))
 command! SlimuxSendKeysLast      call SlimuxSendKeys(s:previous_keys != "" ? s:previous_keys : input('KEYS>'))
 command! SlimuxSendKeysConfigure call s:SelectPane(s:keys_packet)
+
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Global interface (i.e. for repl, shell, and keys )
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+let s:global_conf = { "target_pane": "", "type": "global" }
+
+command! SlimuxGlobalConfigure call s:SelectPane(s:global_conf)
