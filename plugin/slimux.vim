@@ -262,8 +262,27 @@ function! s:SlimeSendRange()  range abort
     call setreg('"',rv, rt)
 endfunction
 
+" Pointers taken from the s:Preserve(command) function as shown in
+" http://vimcasts.org/episodes/tidying-whitespace/
+function! s:GetParagraph()
+    " Preparation: save last search, and cursor position.
+    let l:clipboard = getreg('"')
+    let l:l = line(".")
+    let l:c = col(".")
+
+    " Do the business:
+    silent normal ""yip
+    let l:paragraph = getreg('"')
+
+    " Cleanup: restore last cursor position and old clipboard
+    call setreg('"', l:clipboard)
+    call cursor(l:l, l:c)
+
+    return l:paragraph
+endfunction
 
 command! SlimuxREPLSendLine call SlimuxSendCode(getline(".") . "\n")
+command! SlimuxREPLSendParagraph call SlimuxSendCode(s:GetParagraph())
 command! -range=% -bar -nargs=* SlimuxREPLSendSelection call SlimuxSendCode(s:GetVisual())
 command! -range -bar -nargs=0 SlimuxREPLSendLine <line1>,<line2>call s:SlimeSendRange()
 command! -range=% -bar -nargs=* SlimuxREPLSendBuffer call SlimuxSendCode(s:GetBuffer())
