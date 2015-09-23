@@ -216,6 +216,9 @@ function! s:GetVisual() range
     let selection = getreg('"')
     call setreg('"', reg_save, regtype_save)
     let &clipboard = cb_save
+
+    silent normal! gv
+
     return selection
 endfunction
 
