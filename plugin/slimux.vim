@@ -119,7 +119,7 @@ function! s:SelectPane(tmux_packet)
     nnoremap <buffer> <silent> q :hide<CR>
     nnoremap <buffer> <silent> <C-c> :hide<CR>
 
-    if !exists("g:slimux_enable_close_with_esc") && g:slimux_enable_close_with_esc != 0
+    if !exists("g:slimux_enable_close_with_esc") || g:slimux_enable_close_with_esc != 0
         nnoremap <buffer> <silent> <ESC> :hide<CR>
     endif
 
