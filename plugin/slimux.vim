@@ -72,7 +72,7 @@ function! s:SelectPane(tmux_packet)
     let &filetype=g:slimux_buffer_filetype
 
     " Set header for the menu buffer
-    call setline(1, "# Enter: Select pane - Space: Test - Esc/q: Cancel")
+    call setline(1, "# Enter: Select pane - Space/x: Test - Esc/q: Cancel")
     call setline(2, "")
 
     " Add last used pane as the first
@@ -123,7 +123,8 @@ function! s:SelectPane(tmux_packet)
     " Use enter key to pick tmux pane
     nnoremap <buffer> <silent> <Enter> :call g:_SlimuxPickPaneFromBuf(g:SlimuxActiveConfigure, 0)<CR>
 
-    nnoremap <buffer> <Space> :call g:_SlimuxPickPaneFromBuf(g:SlimuxActiveConfigure, 1)<CR>
+    nnoremap <buffer> <silent> x :call g:_SlimuxPickPaneFromBuf(g:SlimuxActiveConfigure, 1)<CR>
+    nnoremap <buffer> <silent> <Space> :call g:_SlimuxPickPaneFromBuf(g:SlimuxActiveConfigure, 1)<CR>
 
     " Set key mapping for pane index hitns
     if !exists("g:slimux_pane_hint_map")
