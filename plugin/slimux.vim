@@ -103,8 +103,9 @@ function! s:SelectPane(tmux_packet)
     setlocal nobuflisted nomodifiable noswapfile nowrap
     setlocal cursorline nocursorcolumn
 
-    " Hide buffer on q and <ESC>
+    " Hide buffer on q, C-c and <ESC>
     nnoremap <buffer> <silent> q :hide<CR>
+    nnoremap <buffer> <silent> <C-c> :hide<CR>
     nnoremap <buffer> <silent> <ESC> :hide<CR>
 
     " Use enter key to pick tmux pane
