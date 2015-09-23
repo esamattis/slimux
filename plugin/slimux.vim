@@ -91,7 +91,7 @@ function! s:SelectPane(tmux_packet)
     " We need the pane_id at the beginning of the line so we can
     " identify the selected target pane
     let l:format = '#{pane_id}: ' . g:slimux_pane_format
-    let l:command = "read !tmux list-panes -F '" . escape(l:format, '#') . "'"
+    let l:command = "silent read !tmux list-panes -F '" . escape(l:format, '#') . "'"
 
     " if g:slimux_select_from_current_window = 1, then list panes from current
     " window only.
