@@ -72,7 +72,7 @@ function! s:SelectPane(tmux_packet)
     let &filetype=g:slimux_buffer_filetype
 
     " Set header for the menu buffer
-    call setline(1, "# Enter: Select pane - Space/x: Test - Esc/q: Cancel")
+    call setline(1, "# Enter: Select pane - Space/x: Test - C-c/q: Cancel")
     call setline(2, "")
 
     " Add last used pane as the first
@@ -115,10 +115,13 @@ function! s:SelectPane(tmux_packet)
     setlocal nobuflisted nomodifiable noswapfile nowrap
     setlocal cursorline nocursorcolumn
 
-    " Hide buffer on q, C-c and <ESC>
+    " Hide buffer on q, and C-c
     nnoremap <buffer> <silent> q :hide<CR>
     nnoremap <buffer> <silent> <C-c> :hide<CR>
-    nnoremap <buffer> <silent> <ESC> :hide<CR>
+
+    if !exists("g:slimux_enable_close_with_esc") && g:slimux_enable_close_with_esc != 0
+        nnoremap <buffer> <silent> <ESC> :hide<CR>
+    endif
 
     " Use enter key to pick tmux pane
     nnoremap <buffer> <silent> <Enter> :call g:_SlimuxPickPaneFromBuf(g:SlimuxActiveConfigure, 0)<CR>
