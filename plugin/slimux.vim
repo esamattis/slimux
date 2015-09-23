@@ -38,6 +38,18 @@ function! g:_SlimuxPickPaneFromBuf(tmux_packet, test)
     " Save last selected pane
     let s:last_selected_pane = target_pane
 
+    let type = a:tmux_packet["type"]
+
+    if type == "global"
+        if !exists("b:code_packet")
+            let b:code_packet = { "target_pane": "", "type": "code" }
+        endif
+        let b:code_packet["target_pane"] = a:tmux_packet["target_pane"]
+        let s:cmd_packet["target_pane"] = a:tmux_packet["target_pane"]
+        let s:keys_packet["target_pane"] = a:tmux_packet["target_pane"]
+        return
+    endif
+
     if !empty(s:retry_send)
         call s:Send(s:retry_send)
         let s:retry_send = {}
@@ -306,3 +318,11 @@ endfunction
 command! SlimuxSendKeysPrompt    call SlimuxSendKeys(input('KEYS>', s:previous_keys))
 command! SlimuxSendKeysLast      call SlimuxSendKeys(s:previous_keys != "" ? s:previous_keys : input('KEYS>'))
 command! SlimuxSendKeysConfigure call s:SelectPane(s:keys_packet)
+
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Global interface (i.e. for repl, shell, and keys )
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+let s:global_conf = { "target_pane": "", "type": "global" }
+
+command! SlimuxGlobalConfigure call s:SelectPane(s:global_conf)
