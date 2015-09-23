@@ -113,8 +113,11 @@ function! s:SelectPane(tmux_packet)
 
     nnoremap <buffer> <Space> :call g:_SlimuxPickPaneFromBuf(g:SlimuxActiveConfigure, 1)<CR>
 
-    " Use d key to display pane index hints
-    nnoremap <buffer> <silent> d :call system("tmux display-panes")<CR>
+    " Set key mapping for pane index hitns
+    if !exists("g:slimux_pane_hint_map")
+      let g:slimux_pane_hint_map = 'dd'
+    endif
+    execute 'nnoremap <buffer> <silent> ' . g:slimux_pane_hint_map . ' :call system("tmux display-panes")<CR>'
 
 endfunction
 
