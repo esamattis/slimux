@@ -27,6 +27,11 @@ function! SlimuxGetPaneList(lead, ...)
         let l:current_pane_id = substitute(l:current_pane_id, "\n", "", "g")
         let l:lst = filter(l:lst, 'v:val !~ "' . l:current_pane_id . '"')
     endif
+    if exists("g:slimux_exclude_other_sessions") && g:slimux_exclude_other_sessions != 0
+        let l:current_session_id = system('tmux display-message -p "#{session_name}"')
+        let l:current_session_id = substitute(l:current_session_id, "\n", "", "g")
+        let l:lst = filter(l:lst, 'v:val =~ "' . l:current_session_id . ':"')
+    endif
 
     return filter(l:lst, 'v:val =~ ''\V\^''. a:lead')
 endfunction
@@ -81,7 +86,7 @@ function! s:SelectPane(tmux_packet, ...)
      " Save config dict to global so that it can be accessed later
      let g:SlimuxActiveConfigure = a:tmux_packet
 
-    if exists('a:1')
+    if a:0 >= 1
         if a:1 != ""
             call s:ConfSetPane(g:SlimuxActiveConfigure, a:1)
             return
@@ -130,6 +135,11 @@ function! s:SelectPane(tmux_packet, ...)
         let l:current_pane_id = system('tmux display-message -p "\#{pane_id}"')
         let l:current_pane_id = substitute(l:current_pane_id, "\n", "", "g")
         let l:command .= " | grep -E -v " . shellescape("^" . l:current_pane_id, 1)
+    endif
+    if exists("g:slimux_exclude_other_sessions") && g:slimux_exclude_other_sessions != 0
+        let l:current_session_id = system('tmux display-message -p "#{session_name}"')
+        let l:current_session_id = substitute(l:current_session_id, "\n", "", "g")
+        let l:command .= " | grep -E " . shellescape(" " . l:current_session_id . ":", 1)
     endif
 
     " Warn if no additional pane is found
@@ -309,11 +319,15 @@ endfunction
 
 " Code interface uses per buffer configuration
 
-function! SlimuxConfigureCode()
+function! SlimuxConfigureCode(...)
   if !exists("b:code_packet")
     let b:code_packet = { "target_pane": "", "type": "code" }
   endif
-  call s:SelectPane(b:code_packet)
+  if a:0 >= 1
+      call s:SelectPane(b:code_packet, a:1)
+  else
+      call s:SelectPane(b:code_packet)
+  endif
 endfunction
 
 function! SlimuxSendCode(text)
@@ -340,9 +354,7 @@ command! SlimuxREPLSendParagraph call SlimuxSendCode(s:GetParagraph())
 command! -range=% -bar -nargs=* SlimuxREPLSendSelection call SlimuxSendCode(s:GetVisual())
 command! -range -bar -nargs=0 SlimuxREPLSendLine <line1>,<line2>call s:SlimeSendRange()
 command! -range=% -bar -nargs=* SlimuxREPLSendBuffer call SlimuxSendCode(s:GetBuffer())
-command! SlimuxREPLConfigure call SlimuxConfigureCode()
-
-
+command! -nargs=? -complete=customlist,SlimuxGetPaneList SlimuxREPLConfigure call SlimuxConfigureCode(<q-args>)
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Shell interface
@@ -364,8 +376,7 @@ endfunction
 command! -nargs=1 -complete=shellcmd SlimuxShellRun call SlimuxSendCommand("<args>")
 command! SlimuxShellPrompt    call SlimuxSendCommand(input("CMD>", s:previous_cmd))
 command! SlimuxShellLast      call SlimuxSendCommand(s:previous_cmd != "" ? s:previous_cmd : input("CMD>", s:previous_cmd))
-command! SlimuxShellConfigure call s:SelectPane(s:cmd_packet)
-
+command! -nargs=? -complete=customlist,SlimuxGetPaneList SlimuxShellConfigure call s:SelectPane(s:cmd_packet, <q-args>)
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Keys interface
@@ -391,7 +402,7 @@ endfunction
 command! -nargs=1 SlimuxSendKeys call SlimuxSendKeys("<args>")
 command! SlimuxSendKeysPrompt    call SlimuxSendKeys(input('KEYS>', s:previous_keys))
 command! SlimuxSendKeysLast      call SlimuxSendKeys(s:previous_keys != "" ? s:previous_keys : input('KEYS>'))
-command! SlimuxSendKeysConfigure call s:SelectPane(s:keys_packet)
+command! -nargs=? -complete=customlist,SlimuxGetPaneList SlimuxSendKeysConfigure call s:SelectPane(s:keys_packet, <q-args>)
 
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -399,5 +410,4 @@ command! SlimuxSendKeysConfigure call s:SelectPane(s:keys_packet)
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 let s:global_conf = { "target_pane": "", "type": "global" }
 
-command! SlimuxGlobalConfigure call s:SelectPane(s:global_conf)
-command! -nargs=? -complete=customlist,SlimuxGetPaneList SlimuxShellConfigure call s:SelectPane(s:cmd_packet, <q-args>)
+command! -nargs=? -complete=customlist,SlimuxGetPaneList SlimuxGlobalConfigure call s:SelectPane(s:global_conf, <q-args>)
