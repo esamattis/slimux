@@ -391,15 +391,17 @@ command! -nargs=? -complete=customlist,SlimuxGetPaneList SlimuxShellConfigure ca
 let s:keys_packet = { "target_pane": "", "type": "keys" }
 let s:previous_keys = ""
 
-function! SlimuxSendKeys(keys)
+function! SlimuxSendKeys(keys, ...)
+  if a:0 == 0
+      let s:previous_keys = a:keys
+  endif
 
-  let s:previous_keys = a:keys
   let s:keys_packet["keys"] = a:keys
   call s:Send(s:keys_packet)
 
 endfunction
 
-command! -nargs=1 SlimuxSendKeys call SlimuxSendKeys("<args>")
+command! -nargs=1 SlimuxSendKeys call SlimuxSendKeys("<args>", 1)
 command! SlimuxSendKeysPrompt    call SlimuxSendKeys(input('KEYS>', s:previous_keys))
 command! SlimuxSendKeysLast      call SlimuxSendKeys(s:previous_keys != "" ? s:previous_keys : input('KEYS>'))
 command! -nargs=? -complete=customlist,SlimuxGetPaneList SlimuxSendKeysConfigure call s:SelectPane(s:keys_packet, <q-args>)
