@@ -261,9 +261,11 @@ function! s:GetVisual() range
     silent normal! ""gvy
     let selection = getreg('"')
 
-    " restore the selection, this only works if we don't change
-    " pane selection buffer
-    silent normal! gv
+    if exists("g:slimux_restore_selection_after_visual") && g:slimux_restore_selection_after_visual == 1
+        " restore the selection, this only works if we don't change
+        " pane selection buffer
+        silent normal! gv
+    endif
     call setreg('"', reg_save, regtype_save)
     let &clipboard = cb_save
     return selection
