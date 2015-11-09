@@ -207,8 +207,8 @@ function! s:Send(tmux_packet)
         let text = s:ExecFileTypeFn("SlimuxEscape_", [text])
       endif
 
-      call system("tmux load-buffer -", text)
-      call system("tmux paste-buffer -t " . target)
+      call system("tmux load-buffer -b Slimux -", text)
+      call system("tmux paste-buffer -b Slimux -t " . target)
 
       if type == "code"
         call s:ExecFileTypeFn("SlimuxPost_", [target])
