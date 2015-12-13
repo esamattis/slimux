@@ -7,6 +7,7 @@ if $TMUX != ""
 else
     let s:vim_inside_tmux = 0
 endif
+let s:tmux_version = system('tmux -V')[5:-1] " skip 5 chars: 'tmux '
 
 let s:slimux_panelist_cmd = "tmux list-panes -a"
 let s:retry_send = {}
@@ -207,8 +208,9 @@ function! s:Send(tmux_packet)
         let text = s:ExecFileTypeFn("SlimuxEscape_", [text])
       endif
 
-      call system("tmux load-buffer -b Slimux -", text)
-      call system("tmux paste-buffer -b Slimux -t " . target)
+      let named_buffer = s:tmux_version >= '2.0' ? '-b Slimux' : ''
+      call system('tmux load-buffer ' . named_buffer . ' -', text)
+      call system('tmux paste-buffer ' . named_buffer . ' -t ' . target)
 
       if type == "code"
         call s:ExecFileTypeFn("SlimuxPost_", [target])
