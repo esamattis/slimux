@@ -2,14 +2,20 @@
 " Maintainer Esa-Matti Suuronen <esa-matti@suuronen.org>
 " License: MIT. See LICENSE
 
+if !exists('g:slimux_tmux_path')
+    let g:slimux_tmux_path = system('command -v tmux')
+endif
+if $PREFERRED_TMUX != ''
+    let g:tmux_preferred_cmd = ''
+endif
 if $TMUX != ""
     let s:vim_inside_tmux = 1
 else
     let s:vim_inside_tmux = 0
 endif
-let s:tmux_version = system('tmux -V')[5:-1] " skip 5 chars: 'tmux '
+let s:tmux_version = system(g:slimux_tmux_path . ' -V')[5:-1] " skip 5 chars: 'tmux '
 
-let s:slimux_panelist_cmd = "tmux list-panes -a"
+let s:slimux_panelist_cmd = g:slimux_tmux_path . ' list-panes -a'
 let s:retry_send = {}
 let s:last_selected_pane = ""
 
@@ -27,7 +33,7 @@ function! SlimuxGetPaneList(lead, ...)
 
     if s:vim_inside_tmux == 1 && ( !exists("g:slimux_exclude_vim_pane") || g:slimux_exclude_vim_pane != 0 )
         " Remove current pane from pane list
-        let l:current_pane_id = system('tmux display-message -p "#{session_name}:#{window_index}.#{pane_index}"')
+        let l:current_pane_id = system(g:slimux_tmux_path . ' display-message -p "#{session_name}:#{window_index}.#{pane_index}"')
         let l:current_pane_id = substitute(l:current_pane_id, "\n", "", "g")
         let l:lst = filter(l:lst, 'v:val !~ "' . l:current_pane_id . '"')
     endif
@@ -121,7 +127,7 @@ function! s:SelectPane(tmux_packet, ...)
     " We need the pane_id at the beginning of the line so we can
     " identify the selected target pane
     let l:format = '#{pane_id}: ' . g:slimux_pane_format
-    let l:command = "tmux list-panes -F '" . escape(l:format, '#') . "'"
+    let l:command = g:slimux_tmux_path . " list-panes -F '" . escape(l:format, '#') . "'"
 
     " if g:slimux_select_from_current_window = 1, then list panes from current
     " window only.
@@ -133,7 +139,7 @@ function! s:SelectPane(tmux_packet, ...)
 
     if s:vim_inside_tmux == 1 && ( !exists("g:slimux_exclude_vim_pane") || g:slimux_exclude_vim_pane != 0 )
         " Remove current pane from pane list
-        let l:current_pane_id = system('tmux display-message -p "\#{pane_id}"')
+        let l:current_pane_id = system(g:slimux_tmux_path . ' display-message -p "\#{pane_id}"')
         let l:current_pane_id = substitute(l:current_pane_id, "\n", "", "g")
         let l:command .= " | grep -E -v " . shellescape("^" . l:current_pane_id, 1)
     endif
@@ -183,7 +189,7 @@ function! s:SelectPane(tmux_packet, ...)
     if !exists("g:slimux_pane_hint_map")
       let g:slimux_pane_hint_map = 'd'
     endif
-    execute 'nnoremap <buffer> <silent> ' . g:slimux_pane_hint_map . ' :call system("tmux display-panes")<CR>'
+    execute 'nnoremap <buffer> <silent> ' . g:slimux_pane_hint_map . ' :call system("' . g:slimux_tmux_path . ' display-panes")<CR>'
 
 endfunction
 
@@ -209,8 +215,8 @@ function! s:Send(tmux_packet)
       endif
 
       let named_buffer = s:tmux_version >= '2.0' ? '-b Slimux' : ''
-      call system('tmux load-buffer ' . named_buffer . ' -', text)
-      call system('tmux paste-buffer ' . named_buffer . ' -t ' . target)
+      call system(g:slimux_tmux_path . ' load-buffer ' . named_buffer . ' -', text)
+      call system(g:slimux_tmux_path . ' paste-buffer ' . named_buffer . ' -t ' . target)
 
       if type == "code"
         call s:ExecFileTypeFn("SlimuxPost_", [target])
@@ -219,7 +225,7 @@ function! s:Send(tmux_packet)
     elseif type == 'keys'
 
       let keys = a:tmux_packet["keys"]
-      call system("tmux send-keys -t " . target . " " . keys)
+      call system(g:slimux_tmux_path . ' send-keys -t " . target . " " . keys)
 
     endif
 

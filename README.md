@@ -163,6 +163,10 @@ You can use [Python][] and [CoffeeScript][] hooks as examples.
 
 ## Options
 
+- `g:slimux_tmux_path = /path/to/your/tmux` sets the path to the
+  preferred tmux binary, if not specified, defaults to getting tmux
+  command from path using `system('command -v tmux')`.
+
 - `g:slimux_select_from_current_window = 1` select panes only from current
   window. Defaults to `0` to select panes from all tmux panes.
 
