@@ -49,6 +49,10 @@ Send current line to configured pane.
 
 Send last visually selected text to configured pane.
 
+### SlimuxREPLSendBuffer
+
+Send current buffer to configured pane.
+
 ### SlimuxREPLConfigure
 
 Prompt pane configuration for current buffer.
@@ -117,6 +121,7 @@ put to your `.vimrc`
 
     map <Leader>s :SlimuxREPLSendLine<CR>
     vmap <Leader>s :SlimuxREPLSendSelection<CR>
+    map <Leader>b :SlimuxREPLSendBuffer<CR>
     map <Leader>a :SlimuxShellLast<CR>
     map <Leader>k :SlimuxSendKeysLast<CR>
 
