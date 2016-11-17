@@ -43,26 +43,26 @@ Slimux requires fairly recent tmux version. Be sure you have 1.5.x or later.
 
 ### SlimuxREPLSendLine
 
-Send current line to configured pane.
+Send current line to the configured pane.
 
 ### SlimuxREPLSendSelection
 
-Send last visually selected text to configured pane.
+Send last visually selected text to the configured pane.
 
 ### SlimuxREPLSendBuffer
 
-Send current buffer to configured pane.
+Send current buffer to the configured pane.
 
 ### SlimuxREPLConfigure
 
-Prompt pane configuration for current buffer.
+Prompt pane configuration for the current buffer.
 
 
 ## Shell Commands
 
 ### SlimuxShellPrompt
 
-Prompt for a shell command and send it to configured tmux pane.
+Prompt for a shell command and send it to the configured tmux pane.
 
 ### SlimuxShellLast
 
