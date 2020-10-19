@@ -1,3 +1,8 @@
+NOTE: This repository is not actively maintained anymore. You have an active fork
+please add a comment to [this issue](https://github.com/esamattis/slimux/issues/86)
+so others can find it, thanks!
+
+
 # Slimux
 
 This is a SLIME inspired tmux integration plugin for Vim. It makes it easy to interact
